@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    paths-ignore:
+    - '**/*.md'
+    - '**/*.org'
+  schedule:
+    - cron: '0 */8 * * *'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        emacs_version: [29.1]
+    steps:
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+      - uses: actions/checkout@v4
+      - name: Sync packages
+        env:
+          ACCESS_LOGIN: ${{ secrets.ACCESS_LOGIN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          chmod +x mirror-elpa
+          ./mirror-elpa

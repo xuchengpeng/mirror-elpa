@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -ev
+
+elpa_clone_url="https://github.com/dochang/elpa-clone.git"
+elpa_clone_path="/tmp/.elpa-clone"
+mirror_host="github.com"
+mirror_owner="xuchengpeng"
+mirror_repo="elpa-mirror"
+mirror_branch="main"
+mirror_url="https://$ACCESS_LOGIN:$ACCESS_TOKEN@${mirror_host}/${mirror_owner}/${mirror_repo}.git"
+mirror_path="/tmp/.elpa-mirror"
+
+function log {
+  echo "[$(date '+%d/%m/%y %H:%M:%S')]" "$@"
+}
+
+function clone {
+  log "Updating mirror for $2 ($1)"
+  emacs -l "$elpa_clone_path/elpa-clone.el" -nw --batch --eval="(elpa-clone \"$1\" \"$mirror_path/$2\")"
+}
+
+log "clone elpa-clone"
+rm -rf $elpa_clone_path
+git clone --depth 1 "$elpa_clone_url" "$elpa_clone_path"
+
+if [[ ! -d "$mirror_path" ]]; then
+  log "Cloning mirror repository"
+  git clone --depth 1 --branch="$mirror_branch" "$mirror_url" "$mirror_path"
+fi
+
+clone "https://elpa.gnu.org/packages/" "gnu"
+clone "https://elpa.nongnu.org/nongnu/" "nongnu"
+clone "rsync://melpa.org/packages/" "melpa"
+clone "rsync://stable.melpa.org/packages/" "stable-melpa"
+
+cd "$mirror_path"
+log "Configure repository"
+git config user.name "xuchengpeng"
+git config user.email "330476629@qq.com"
+git add .
+if [ -z "$(git status --porcelain)" ]; then
+  log "Nothing to commit"
+else
+  log "Committing and pushing all changes to mirror repository"
+  git commit -m "snapshot `date +"%Y-%m-%d %H:%M:%S"`"
+fi
+if [[ "$mirror_url" != "" ]]; then
+  git push "$mirror_url" "$mirror_branch"
+fi
