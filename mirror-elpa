@@ -31,8 +31,8 @@ fi
 
 clone "https://elpa.gnu.org/packages/" "gnu"
 clone "https://elpa.nongnu.org/nongnu/" "nongnu"
-clone "https://melpa.org/packages/" "melpa"
-clone "https://stable.melpa.org/packages/" "stable-melpa"
+clone "rsync://melpa.org/packages/" "melpa"
+clone "rsync://stable.melpa.org/packages/" "stable-melpa"
 
 cd "$mirror_path"
 log "Configure repository"
