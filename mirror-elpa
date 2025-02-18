@@ -37,7 +37,7 @@ clone "rsync://stable.melpa.org/packages/" "stable-melpa"
 cd "$mirror_path"
 log "Configure repository"
 git config user.name "xuchengpeng"
-git config user.email "330476629@qq.com"
+git config user.email "chuckxcp@qq.com"
 git add .
 if [ -z "$(git status --porcelain)" ]; then
   log "Nothing to commit"
